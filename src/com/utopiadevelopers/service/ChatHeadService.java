@@ -26,17 +26,19 @@ public class ChatHeadService extends Service
 	private WindowManager.LayoutParams params1;
 	private WindowManager.LayoutParams params2;
 	private WindowManager.LayoutParams params3;
+	private WindowManager.LayoutParams params4;
 
 	private TextView checkinIcon;
 	private TextView infoIcon;
 	private TextView cameraIcon;
 	private TextView reviewIcon;
+	private TextView closeIcon;
 
 	private LinearLayout checkinView;
 	private LinearLayout infoView;
 	private LinearLayout cameraView;
 	private LinearLayout reviewView;
-	private LinearLayout crossLayout;
+	private LinearLayout closeView;
 
 	private int size;
 	private int screenW;
@@ -113,6 +115,32 @@ public class ChatHeadService extends Service
 		tvParams.gravity = Gravity.CENTER;
 
 		LinearLayout.LayoutParams lpParams = new LinearLayout.LayoutParams(size, size);
+
+		closeView = new LinearLayout(this);
+		closeView.setLayoutParams(tvParams);
+		closeView.setBackgroundResource(R.drawable.close_view_grad);
+		closeView.setGravity(Gravity.CENTER);
+		closeView.setVisibility(View.INVISIBLE);
+
+		LinearLayout crossView = new LinearLayout(this);
+		crossView.setLayoutParams(lpParams);
+		crossView.setBackgroundResource(R.drawable.round_drawable_grey);
+
+		closeIcon = new TextView(this);
+		closeIcon.setTypeface(font);
+		closeIcon.setText("X");
+		closeIcon.setTextSize(textsizeSmall);
+		closeIcon.setTextColor(Color.BLACK);
+		closeIcon.setGravity(Gravity.CENTER);
+		closeIcon.setLayoutParams(lpParams);
+
+		params4 = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, 3 * size, WindowManager.LayoutParams.TYPE_PHONE,
+				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
+		params4.gravity = Gravity.BOTTOM;
+
+		crossView.addView(closeIcon);
+		closeView.addView(crossView);
+		windowManager.addView(closeView, params4);
 
 		checkinView = new LinearLayout(this);
 		checkinView.setLayoutParams(lpParams);
@@ -314,12 +342,12 @@ public class ChatHeadService extends Service
 
 	public void showCross()
 	{
-
+		closeView.setVisibility(View.VISIBLE);
 	}
 
 	public void hideCross()
 	{
-
+		closeView.setVisibility(View.INVISIBLE);
 	}
 
 	private void setOnClickListener()
@@ -373,11 +401,13 @@ public class ChatHeadService extends Service
 					{
 						showMaincheckin();
 					}
+					hideCross();
 					return true;
 				case MotionEvent.ACTION_MOVE:
 					if (isClicked && (Math.abs(initialTouchX - event.getRawX()) > 15 || Math.abs(initialTouchY) - event.getRawY() > 15))
 					{
 						hideOthercheckins();
+						showCross();
 						isClicked = false;
 					}
 					params.x = initialX + (int) (event.getRawX() - initialTouchX);
