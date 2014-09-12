@@ -2,29 +2,46 @@ package com.utopiadevelopers.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Typeface;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.utopiadevelopers.chatheads.R;
 
 public class ChatHeadService extends Service
 {
-	private static String TAG = "ChatHeadService";
-	private static int DIAMETER = 10;
+	private static String TAG = "checkinService";
 	private WindowManager windowManager;
 	private WindowManager.LayoutParams params;
-	private ImageView chatHead;
-	private ImageView chatHead1;
-	private ImageView chatHead2;
-	private ImageView chatHead3;
+	private WindowManager.LayoutParams params1;
+	private WindowManager.LayoutParams params2;
+	private WindowManager.LayoutParams params3;
+
+	private TextView checkinIcon;
+	private TextView infoIcon;
+	private TextView cameraIcon;
+	private TextView reviewIcon;
+
+	private LinearLayout checkinView;
+	private LinearLayout infoView;
+	private LinearLayout cameraView;
+	private LinearLayout reviewView;
+
+	private int size;
+	private int screenW;
+	private int screenY;
+
+	private boolean arecheckinsOpen = false;
 
 	@Override
 	public IBinder onBind(Intent intent)
@@ -38,7 +55,14 @@ public class ChatHeadService extends Service
 		super.onCreate();
 		logService("Service Created");
 		windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-		createOtherChatHeads();
+
+		DisplayMetrics metrics = getResources().getDisplayMetrics();
+		screenW = windowManager.getDefaultDisplay().getWidth();
+		screenY = windowManager.getDefaultDisplay().getHeight();
+
+		size = screenW / 7;
+
+		createOthercheckins();
 		setOnClickListener();
 		setOnTouchListener();
 	}
@@ -55,12 +79,12 @@ public class ChatHeadService extends Service
 	{
 		super.onDestroy();
 		logService("Service Destroyed");
-		if (chatHead != null)
+		if (checkinIcon != null)
 		{
-			windowManager.removeView(chatHead);
-			windowManager.removeView(chatHead1);
-			windowManager.removeView(chatHead2);
-			windowManager.removeView(chatHead3);
+			windowManager.removeView(checkinView);
+			windowManager.removeView(infoView);
+			windowManager.removeView(cameraView);
+			windowManager.removeView(reviewView);
 		}
 	}
 
@@ -71,86 +95,181 @@ public class ChatHeadService extends Service
 
 	// Chat Head Functions
 
-	private void createOtherChatHeads()
+	private void createOthercheckins()
 	{
+		int textsize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 28, getResources().getDisplayMetrics());
+		Typeface font = Typeface.createFromAsset(getAssets(), "fonts/zombats-app.ttf");
 
-		chatHead = new ImageView(this);
-		Bitmap map = BitmapFactory.decodeResource(getResources(), R.drawable.chat);
-		chatHead.setImageBitmap(map);
+		LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.MATCH_PARENT);
+		tvParams.gravity = Gravity.CENTER;
 
-		params = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
-				WindowManager.LayoutParams.TYPE_PHONE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
+		LinearLayout.LayoutParams lpParams = new LinearLayout.LayoutParams(size, size);
+
+		checkinView = new LinearLayout(this);
+		checkinView.setLayoutParams(lpParams);
+		checkinView.setBackgroundResource(R.drawable.round_drawable);
+
+		checkinIcon = new TextView(this);
+		checkinIcon.setTypeface(font);
+		checkinIcon.setText("P");
+		checkinIcon.setTextColor(Color.WHITE);
+		checkinIcon.setTextSize(textsize);
+		checkinIcon.setGravity(Gravity.CENTER);
+		checkinIcon.setLayoutParams(tvParams);
+
+		params = new WindowManager.LayoutParams(size, size, WindowManager.LayoutParams.TYPE_PHONE,
+				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
 		params.gravity = Gravity.TOP | Gravity.LEFT;
-		params.x = 0;
-		params.y = 100;
 
-		windowManager.addView(chatHead, params);
+		checkinView.addView(checkinIcon);
+		windowManager.addView(checkinView, params);
 
-		chatHead1 = new ImageView(this);
-		Bitmap map1 = BitmapFactory.decodeResource(getResources(), R.drawable.compressor);
-		chatHead1.setImageBitmap(map1);
-		chatHead1.setVisibility(View.INVISIBLE);
+		infoView = new LinearLayout(this);
+		infoView.setLayoutParams(lpParams);
+		infoView.setBackgroundResource(R.drawable.round_drawable_grey);
+		infoView.setVisibility(View.INVISIBLE);
 
-		WindowManager.LayoutParams params1 = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
-				WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PHONE,
+		infoIcon = new TextView(this);
+		infoIcon.setTypeface(font);
+		infoIcon.setTextColor(Color.WHITE);
+		infoIcon.setText(",");
+		infoIcon.setTextSize(textsize);
+		infoIcon.setGravity(Gravity.CENTER);
+		infoIcon.setLayoutParams(tvParams);
+
+		params1 = new WindowManager.LayoutParams(size, size, WindowManager.LayoutParams.TYPE_PHONE,
 				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
 		params1.gravity = Gravity.TOP | Gravity.LEFT;
-		params1.x = 200;
-		params1.y = 200;
 
-		windowManager.addView(chatHead1, params1);
+		infoView.addView(infoIcon);
+		windowManager.addView(infoView, params1);
 
-		chatHead2 = new ImageView(this);
-		Bitmap map2 = BitmapFactory.decodeResource(getResources(), R.drawable.fina);
-		chatHead2.setImageBitmap(map2);
-		chatHead2.setVisibility(View.INVISIBLE);
+		cameraView = new LinearLayout(this);
+		cameraView.setLayoutParams(lpParams);
+		cameraView.setBackgroundResource(R.drawable.round_drawable_grey);
+		cameraView.setVisibility(View.INVISIBLE);
 
-		WindowManager.LayoutParams params2 = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
-				WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PHONE,
+		cameraIcon = new TextView(this);
+		cameraIcon.setTypeface(font);
+		cameraIcon.setText("|");
+		cameraIcon.setTextColor(Color.WHITE);
+		cameraIcon.setTextSize(textsize);
+		cameraIcon.setGravity(Gravity.CENTER);
+		cameraIcon.setLayoutParams(tvParams);
+
+		params2 = new WindowManager.LayoutParams(size, size, WindowManager.LayoutParams.TYPE_PHONE,
 				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
 		params2.gravity = Gravity.TOP | Gravity.LEFT;
-		params2.x = 400;
-		params2.y = 400;
 
-		windowManager.addView(chatHead2, params2);
+		cameraView.addView(cameraIcon);
+		windowManager.addView(cameraView, params2);
 
-		chatHead3 = new ImageView(this);
-		Bitmap map3 = BitmapFactory.decodeResource(getResources(), R.drawable.aperture);
-		chatHead3.setImageBitmap(map3);
-		chatHead3.setVisibility(View.INVISIBLE);
+		reviewView = new LinearLayout(this);
+		reviewView.setLayoutParams(lpParams);
+		reviewView.setBackgroundResource(R.drawable.round_drawable_grey);
+		reviewView.setVisibility(View.INVISIBLE);
 
-		WindowManager.LayoutParams params3 = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
-				WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PHONE,
+		reviewIcon = new TextView(this);
+		reviewIcon.setTypeface(font);
+		reviewIcon.setText("J");
+		reviewIcon.setTextSize(textsize);
+		reviewIcon.setTextColor(Color.WHITE);
+		reviewIcon.setGravity(Gravity.CENTER);
+		reviewIcon.setLayoutParams(tvParams);
+
+		params3 = new WindowManager.LayoutParams(size, size, WindowManager.LayoutParams.TYPE_PHONE,
 				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
 		params3.gravity = Gravity.TOP | Gravity.LEFT;
-		params3.x = 600;
-		params3.y = 600;
 
-		windowManager.addView(chatHead3, params3);
+		reviewView.addView(reviewIcon);
+		windowManager.addView(reviewView, params3);
 	}
 
-	public void showOtherChatHeads()
+	public void showMaincheckin()
 	{
-		chatHead1.setVisibility(View.VISIBLE);
-		chatHead2.setVisibility(View.VISIBLE);
-		chatHead3.setVisibility(View.VISIBLE);
+		if (params.x < screenW / 2 - size)
+		{
+			params.x = 0;
+		}
+		else
+		{
+			params.x = screenW - size;
+		}
+		windowManager.updateViewLayout(checkinView, params);
+	}
+
+	public void showOthercheckins()
+	{
+		int GAP = 2 * size;
+		if (params.x < screenW / 2)
+		{
+			params1.x = params.x + 2 * GAP;
+			params1.y = params.y - GAP;
+
+			params2.x = params.x + GAP;
+			params2.y = params.y;
+
+			params3.x = params.x + 2 * GAP;
+			params3.y = params.y + GAP;
+		}
+		else
+		{
+			params1.x = params.x - (int) 1.44 * GAP;
+			params1.y = params.y - (int) 1.44 * GAP;
+
+			params2.x = params.x - GAP;
+			params2.y = params.y;
+
+			params3.x = params.x - (int) 1.44 * GAP;
+			params3.y = params.y + (int) 1.44 * GAP;
+		}
+		windowManager.updateViewLayout(infoView, params1);
+		windowManager.updateViewLayout(cameraView, params2);
+		windowManager.updateViewLayout(reviewView, params3);
+
+		infoView.setVisibility(View.VISIBLE);
+		cameraView.setVisibility(View.VISIBLE);
+		reviewView.setVisibility(View.VISIBLE);
+
+		arecheckinsOpen = true;
+
+		checkinIcon.setText("X");
+	}
+
+	public void hideOthercheckins()
+	{
+		infoView.setVisibility(View.INVISIBLE);
+		cameraView.setVisibility(View.INVISIBLE);
+		reviewView.setVisibility(View.INVISIBLE);
+
+		arecheckinsOpen = false;
+
+		checkinIcon.setText("P");
 	}
 
 	private void setOnClickListener()
 	{
-		chatHead.setOnClickListener(new View.OnClickListener()
+		checkinIcon.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
-				showOtherChatHeads();
+				if (!arecheckinsOpen)
+				{
+					showOthercheckins();
+				}
+				else
+				{
+					hideOthercheckins();
+				}
 			}
 		});
 	}
 
 	private void setOnTouchListener()
 	{
-		chatHead.setOnTouchListener(new View.OnTouchListener()
+		checkinIcon.setOnTouchListener(new View.OnTouchListener()
 		{
 			private int initialX;
 			private int initialY;
@@ -169,12 +288,23 @@ public class ChatHeadService extends Service
 					initialTouchY = event.getRawY();
 					return true;
 				case MotionEvent.ACTION_UP:
-					v.performClick();
+					boolean isClick = false;
+					if (Math.abs(initialX - params.x) < 15 && Math.abs(initialY - params.y) < 15)
+					{
+						isClick = true;
+					}
+					showMaincheckin();
+					if (isClick)
+					{
+						v.performClick();
+					}
 					return true;
 				case MotionEvent.ACTION_MOVE:
+					if (arecheckinsOpen)
+						hideOthercheckins();
 					params.x = initialX + (int) (event.getRawX() - initialTouchX);
 					params.y = initialY + (int) (event.getRawY() - initialTouchY);
-					windowManager.updateViewLayout(chatHead, params);
+					windowManager.updateViewLayout(checkinView, params);
 					return true;
 				}
 				return true;
