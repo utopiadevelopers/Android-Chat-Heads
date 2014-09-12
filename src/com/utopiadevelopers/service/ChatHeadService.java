@@ -7,6 +7,8 @@ import android.os.IBinder;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -38,7 +40,6 @@ public class ChatHeadService extends Service
 		chatHead = new ImageView(this);
 		chatHead.setImageResource(R.drawable.chat);
 		chatHead.setLayoutParams(new LayoutParams(size, size));
-		chatHead.requestLayout();
 
 		WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
 				WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PHONE,
@@ -47,6 +48,7 @@ public class ChatHeadService extends Service
 		params.x = 0;
 		params.y = 100;
 
+		setOnClickListener(params);
 		windowManager.addView(chatHead, params);
 	}
 
@@ -71,5 +73,40 @@ public class ChatHeadService extends Service
 	public void logService(String message)
 	{
 		Log.d(TAG, message);
+	}
+
+	// Chat Head Functions
+
+	private void setOnClickListener(final WindowManager.LayoutParams params)
+	{
+		chatHead.setOnTouchListener(new View.OnTouchListener()
+		{
+			private int initialX;
+			private int initialY;
+			private float initialTouchX;
+			private float initialTouchY;
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				switch (event.getAction())
+				{
+				case MotionEvent.ACTION_DOWN:
+					initialX = params.x;
+					initialY = params.y;
+					initialTouchX = event.getRawX();
+					initialTouchY = event.getRawY();
+					return true;
+				case MotionEvent.ACTION_UP:
+					return true;
+				case MotionEvent.ACTION_MOVE:
+					params.x = initialX + (int) (event.getRawX() - initialTouchX);
+					params.y = initialY + (int) (event.getRawY() - initialTouchY);
+					windowManager.updateViewLayout(chatHead, params);
+					return true;
+				}
+				return false;
+			}
+		});
 	}
 }
