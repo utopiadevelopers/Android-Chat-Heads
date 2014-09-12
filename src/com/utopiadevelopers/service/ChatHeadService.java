@@ -39,6 +39,8 @@ public class ChatHeadService extends Service
 	private LinearLayout cameraView;
 	private LinearLayout reviewView;
 	private LinearLayout closeView;
+	private LinearLayout gradient;
+	private LinearLayout ckintextView;
 
 	private int size;
 	private int screenW;
@@ -50,6 +52,10 @@ public class ChatHeadService extends Service
 	private boolean oldPost = false;
 
 	private boolean arecheckinsOpen = false;
+	private final int closeViewMutipler = 3;
+	private int closeX;
+	private int closeY;
+	private int CLOSE_THRESOLD;
 
 	@Override
 	public IBinder onBind(Intent intent)
@@ -69,19 +75,45 @@ public class ChatHeadService extends Service
 		screenY = windowManager.getDefaultDisplay().getHeight();
 
 		size = screenW / 7;
+		CLOSE_THRESOLD = (int) (1.2 * size);
 
 		textsize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 28, getResources().getDisplayMetrics());
 		textsizeSmall = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 22, getResources().getDisplayMetrics());
 
-		createOthercheckins();
+		createAllCheckinChatHead();
 		setOnClickListener();
+		setOtherClickListener();
 		setOnTouchListener();
+	}
+
+	public void closeChatHeads()
+	{
+		try
+		{
+			if (checkinView != null)
+				windowManager.removeView(checkinView);
+			if (infoView != null)
+				windowManager.removeView(infoView);
+			if (cameraView != null)
+				windowManager.removeView(cameraView);
+			if (reviewView != null)
+				windowManager.removeView(reviewView);
+			if (gradient != null)
+				windowManager.removeView(gradient);
+			if (closeView != null)
+				windowManager.removeView(closeView);
+			if (ckintextView != null)
+				windowManager.removeView(ckintextView);
+		}
+		catch (Exception e)
+		{
+
+		}
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId)
 	{
-		logService("Service OnStart");
 		return START_STICKY;
 	}
 
@@ -89,14 +121,7 @@ public class ChatHeadService extends Service
 	public void onDestroy()
 	{
 		super.onDestroy();
-		logService("Service Destroyed");
-		if (checkinIcon != null)
-		{
-			windowManager.removeView(checkinView);
-			windowManager.removeView(infoView);
-			windowManager.removeView(cameraView);
-			windowManager.removeView(reviewView);
-		}
+		closeChatHeads();
 	}
 
 	public void logService(String message)
@@ -106,8 +131,11 @@ public class ChatHeadService extends Service
 
 	// Chat Head Functions
 
-	private void createOthercheckins()
+	private void createAllCheckinChatHead()
 	{
+		closeX = screenW / 2;
+		closeY = (int) (screenY - (closeViewMutipler / 2 * size) - size);
+
 		Typeface font = Typeface.createFromAsset(getAssets(), "fonts/zombats-app.ttf");
 
 		LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
@@ -115,6 +143,34 @@ public class ChatHeadService extends Service
 		tvParams.gravity = Gravity.CENTER;
 
 		LinearLayout.LayoutParams lpParams = new LinearLayout.LayoutParams(size, size);
+
+		gradient = new LinearLayout(this);
+		gradient.setLayoutParams(tvParams);
+		gradient.setBackgroundResource(R.drawable.activity_grad);
+		gradient.setVisibility(View.INVISIBLE);
+
+		WindowManager.LayoutParams gradParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
+				WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_PHONE,
+				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
+		windowManager.addView(gradient, gradParams);
+
+		params4 = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, closeViewMutipler * size,
+				WindowManager.LayoutParams.TYPE_PHONE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
+		params4.gravity = Gravity.BOTTOM;
+
+		ckintextView = new LinearLayout(this);
+		ckintextView.setLayoutParams(tvParams);
+		ckintextView.setBackgroundColor(Color.TRANSPARENT);
+		ckintextView.setGravity(Gravity.CENTER);
+		ckintextView.setVisibility(View.INVISIBLE);
+
+		TextView tvCheckin = new TextView(this);
+		tvCheckin.setText("CHECKED IN AT");
+		tvCheckin.setGravity(Gravity.CENTER);
+		tvCheckin.setTextColor(Color.WHITE);
+		tvCheckin.setTypeface(null, Typeface.BOLD);
+		ckintextView.addView(tvCheckin);
+		windowManager.addView(ckintextView, params4);
 
 		closeView = new LinearLayout(this);
 		closeView.setLayoutParams(tvParams);
@@ -124,7 +180,7 @@ public class ChatHeadService extends Service
 
 		LinearLayout crossView = new LinearLayout(this);
 		crossView.setLayoutParams(lpParams);
-		crossView.setBackgroundResource(R.drawable.round_drawable_grey);
+		crossView.setBackgroundResource(R.drawable.round_drawable_white);
 
 		closeIcon = new TextView(this);
 		closeIcon.setTypeface(font);
@@ -133,10 +189,7 @@ public class ChatHeadService extends Service
 		closeIcon.setTextColor(Color.BLACK);
 		closeIcon.setGravity(Gravity.CENTER);
 		closeIcon.setLayoutParams(lpParams);
-
-		params4 = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, 3 * size, WindowManager.LayoutParams.TYPE_PHONE,
-				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
-		params4.gravity = Gravity.BOTTOM;
+		// closeView.setVisibility(View.INVISIBLE);
 
 		crossView.addView(closeIcon);
 		closeView.addView(crossView);
@@ -222,9 +275,42 @@ public class ChatHeadService extends Service
 		windowManager.addView(reviewView, params3);
 	}
 
+	private void setOtherClickListener()
+	{
+		infoView.setOnClickListener(new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				logService("Info View Clicked");
+			}
+		});
+
+		cameraView.setOnClickListener(new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				logService("Camera View Clicked");
+			}
+		});
+
+		reviewView.setOnClickListener(new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				logService("Review View Clicked");
+			}
+		});
+	}
+
 	public void showMaincheckin()
 	{
-		if (params.x < screenW / 2 - size)
+		if ((params.x + size / 2) < (screenW / 2))
 		{
 			params.x = 0;
 		}
@@ -309,6 +395,8 @@ public class ChatHeadService extends Service
 			}
 		}
 
+		gradient.setVisibility(View.VISIBLE);
+		ckintextView.setVisibility(View.VISIBLE);
 		infoView.setVisibility(View.VISIBLE);
 		cameraView.setVisibility(View.VISIBLE);
 		reviewView.setVisibility(View.VISIBLE);
@@ -330,6 +418,9 @@ public class ChatHeadService extends Service
 			params.y = oldPosition;
 			windowManager.updateViewLayout(checkinView, params);
 		}
+
+		gradient.setVisibility(View.INVISIBLE);
+		ckintextView.setVisibility(View.INVISIBLE);
 		infoView.setVisibility(View.INVISIBLE);
 		cameraView.setVisibility(View.INVISIBLE);
 		reviewView.setVisibility(View.INVISIBLE);
@@ -399,7 +490,14 @@ public class ChatHeadService extends Service
 					}
 					else
 					{
-						showMaincheckin();
+						if (!handleCloseIf())
+						{
+							showMaincheckin();
+						}
+						else
+						{
+							closeChatHeads();
+						}
 					}
 					hideCross();
 					return true;
@@ -420,13 +518,15 @@ public class ChatHeadService extends Service
 		});
 	}
 
-	private void logParams()
+	private boolean handleCloseIf()
 	{
-		logService("---------------------------------------------");
-		logService("Params 0: (" + params.x + "," + params.y + ")");
-		logService("Params 1: (" + params1.x + "," + params1.y + ")");
-		logService("Params 2: (" + params2.x + "," + params2.y + ")");
-		logService("Params 3: (" + params3.x + "," + params3.y + ")");
-		logService("---------------------------------------------");
+		int checkX = params.x + size / 2;
+		int checkY = params.y + size / 2;
+
+		if (Math.abs(checkX - closeX) < CLOSE_THRESOLD && Math.abs(checkY - closeY) < CLOSE_THRESOLD)
+		{
+			return true;
+		}
+		return false;
 	}
 }
