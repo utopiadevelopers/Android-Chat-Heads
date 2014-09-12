@@ -36,10 +36,13 @@ public class ChatHeadService extends Service
 	private LinearLayout infoView;
 	private LinearLayout cameraView;
 	private LinearLayout reviewView;
+	private LinearLayout crossLayout;
 
 	private int size;
 	private int screenW;
 	private int screenY;
+	private int textsize;
+	private int textsizeSmall;
 
 	private boolean arecheckinsOpen = false;
 
@@ -61,6 +64,9 @@ public class ChatHeadService extends Service
 		screenY = windowManager.getDefaultDisplay().getHeight();
 
 		size = screenW / 7;
+
+		textsize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 28, getResources().getDisplayMetrics());
+		textsizeSmall = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 22, getResources().getDisplayMetrics());
 
 		createOthercheckins();
 		setOnClickListener();
@@ -97,7 +103,6 @@ public class ChatHeadService extends Service
 
 	private void createOthercheckins()
 	{
-		int textsize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 28, getResources().getDisplayMetrics());
 		Typeface font = Typeface.createFromAsset(getAssets(), "fonts/zombats-app.ttf");
 
 		LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
@@ -173,7 +178,7 @@ public class ChatHeadService extends Service
 		reviewIcon = new TextView(this);
 		reviewIcon.setTypeface(font);
 		reviewIcon.setText("J");
-		reviewIcon.setTextSize(textsize);
+		reviewIcon.setTextSize(textsizeSmall);
 		reviewIcon.setTextColor(Color.WHITE);
 		reviewIcon.setGravity(Gravity.CENTER);
 		reviewIcon.setLayoutParams(tvParams);
@@ -202,39 +207,86 @@ public class ChatHeadService extends Service
 	public void showOthercheckins()
 	{
 		int GAP = 2 * size;
-		if (params.x < screenW / 2)
+
+		int checkLengthBottom = (int) (params.y + GAP / 1.5 + 2 * size);
+		if (checkLengthBottom > screenY)
 		{
-			params1.x = params.x + 2 * GAP;
-			params1.y = params.y - GAP;
+			params.y = screenY - (int) (GAP / 1.5 + 3 * size);
+			windowManager.updateViewLayout(checkinView, params);
+			showOthercheckins();
+		}
 
-			params2.x = params.x + GAP;
-			params2.y = params.y;
+		if (params.y < (int) (size / 4))
+		{
+			params.y = (int) size / 4;
+			windowManager.updateViewLayout(checkinView, params);
+			showOthercheckins();
+		}
 
-			params3.x = params.x + 2 * GAP;
-			params3.y = params.y + GAP;
+		int checkLengthTop = (int) (params.y - GAP / 1.5);
+
+		if (checkLengthTop > 0)
+		{
+			if (params.x < screenW / 2)
+			{
+				params1.x = params.x + GAP / 2;
+				params1.y = (int) (params.y - GAP / 1.5);
+
+				params2.x = params.x + GAP;
+				params2.y = params.y;
+
+				params3.x = params.x + GAP / 2;
+				params3.y = (int) (params.y + GAP / 1.5);
+			}
+			else
+			{
+				params1.x = params.x - GAP / 2;
+				params1.y = (int) (params.y - GAP / 1.5);
+
+				params2.x = params.x - GAP;
+				params2.y = params.y;
+
+				params3.x = params.x - GAP / 2;
+				params3.y = (int) (params.y + GAP / 1.5);
+			}
 		}
 		else
 		{
-			params1.x = params.x - (int) 1.44 * GAP;
-			params1.y = params.y - (int) 1.44 * GAP;
+			if (params.x < screenW / 2)
+			{
+				params2.x = (int) (params.x + GAP / 1.5);
+				params2.y = (int) (params.y + GAP / 1.5);
 
-			params2.x = params.x - GAP;
-			params2.y = params.y;
+				params1.x = (int) (params2.x + GAP / 4);
+				params1.y = params.y;
 
-			params3.x = params.x - (int) 1.44 * GAP;
-			params3.y = params.y + (int) 1.44 * GAP;
+				params3.x = params.x;
+				params3.y = (int) (params2.y + GAP / 4);
+			}
+			else
+			{
+				params2.x = (int) (params.x - GAP / 1.5);
+				params2.y = (int) (params.y + GAP / 1.5);
+
+				params1.x = (int) (params2.x - GAP / 4);
+				params1.y = params.y;
+
+				params3.x = params.x;
+				params3.y = (int) (params2.y + GAP / 4);
+			}
 		}
-		windowManager.updateViewLayout(infoView, params1);
-		windowManager.updateViewLayout(cameraView, params2);
-		windowManager.updateViewLayout(reviewView, params3);
 
 		infoView.setVisibility(View.VISIBLE);
 		cameraView.setVisibility(View.VISIBLE);
 		reviewView.setVisibility(View.VISIBLE);
 
-		arecheckinsOpen = true;
+		windowManager.updateViewLayout(infoView, params1);
+		windowManager.updateViewLayout(cameraView, params2);
+		windowManager.updateViewLayout(reviewView, params3);
 
+		arecheckinsOpen = true;
 		checkinIcon.setText("X");
+		checkinIcon.setTextSize(textsizeSmall);
 	}
 
 	public void hideOthercheckins()
@@ -246,6 +298,17 @@ public class ChatHeadService extends Service
 		arecheckinsOpen = false;
 
 		checkinIcon.setText("P");
+		checkinIcon.setTextSize(textsize);
+	}
+
+	public void showCross()
+	{
+
+	}
+
+	public void hideCross()
+	{
+
 	}
 
 	private void setOnClickListener()
@@ -275,6 +338,7 @@ public class ChatHeadService extends Service
 			private int initialY;
 			private float initialTouchX;
 			private float initialTouchY;
+			private boolean isClicked;
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event)
@@ -282,26 +346,29 @@ public class ChatHeadService extends Service
 				switch (event.getAction())
 				{
 				case MotionEvent.ACTION_DOWN:
+					isClicked = true;
 					initialX = params.x;
 					initialY = params.y;
 					initialTouchX = event.getRawX();
 					initialTouchY = event.getRawY();
 					return true;
 				case MotionEvent.ACTION_UP:
-					boolean isClick = false;
-					if (Math.abs(initialX - params.x) < 15 && Math.abs(initialY - params.y) < 15)
+					if (isClicked)
 					{
-						isClick = true;
-					}
-					showMaincheckin();
-					if (isClick)
-					{
+						showMaincheckin();
 						v.performClick();
+					}
+					else
+					{
+						showMaincheckin();
 					}
 					return true;
 				case MotionEvent.ACTION_MOVE:
-					if (arecheckinsOpen)
+					if (isClicked && (Math.abs(initialTouchX - event.getRawX()) > 15 || Math.abs(initialTouchY) - event.getRawY() > 15))
+					{
 						hideOthercheckins();
+						isClicked = false;
+					}
 					params.x = initialX + (int) (event.getRawX() - initialTouchX);
 					params.y = initialY + (int) (event.getRawY() - initialTouchY);
 					windowManager.updateViewLayout(checkinView, params);
@@ -310,5 +377,15 @@ public class ChatHeadService extends Service
 				return true;
 			}
 		});
+	}
+
+	private void logParams()
+	{
+		logService("---------------------------------------------");
+		logService("Params 0: (" + params.x + "," + params.y + ")");
+		logService("Params 1: (" + params1.x + "," + params1.y + ")");
+		logService("Params 2: (" + params2.x + "," + params2.y + ")");
+		logService("Params 3: (" + params3.x + "," + params3.y + ")");
+		logService("---------------------------------------------");
 	}
 }
