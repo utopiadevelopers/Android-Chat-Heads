@@ -44,6 +44,9 @@ public class ChatHeadService extends Service
 	private int textsize;
 	private int textsizeSmall;
 
+	private int oldPosition;
+	private boolean oldPost = false;
+
 	private boolean arecheckinsOpen = false;
 
 	@Override
@@ -211,6 +214,8 @@ public class ChatHeadService extends Service
 		int checkLengthBottom = (int) (params.y + GAP / 1.5 + 2 * size);
 		if (checkLengthBottom > screenY)
 		{
+			oldPosition = params.y;
+			oldPost = true;
 			params.y = screenY - (int) (GAP / 1.5 + 3 * size);
 			windowManager.updateViewLayout(checkinView, params);
 			showOthercheckins();
@@ -291,6 +296,12 @@ public class ChatHeadService extends Service
 
 	public void hideOthercheckins()
 	{
+		if (oldPost)
+		{
+			oldPost = false;
+			params.y = oldPosition;
+			windowManager.updateViewLayout(checkinView, params);
+		}
 		infoView.setVisibility(View.INVISIBLE);
 		cameraView.setVisibility(View.INVISIBLE);
 		reviewView.setVisibility(View.INVISIBLE);
