@@ -1,5 +1,6 @@
 package com.utopiadevelopers.chatheads;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -7,6 +8,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+
+import com.utopiadevelopers.service.ChatHeadService;
 
 public class MainActivity extends ActionBarActivity implements OnClickListener
 {
@@ -46,10 +49,12 @@ public class MainActivity extends ActionBarActivity implements OnClickListener
 		case R.id.btnStart:
 			start.setEnabled(false);
 			stop.setEnabled(true);
+			startService(new Intent(MainActivity.this, ChatHeadService.class));
 			break;
 		case R.id.btnStop:
 			start.setEnabled(true);
 			stop.setEnabled(false);
+			stopService(new Intent(MainActivity.this, ChatHeadService.class));
 			break;
 		default:
 			break;
