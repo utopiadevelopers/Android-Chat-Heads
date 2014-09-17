@@ -102,27 +102,41 @@ public class ChatHeadService extends Service
 
 	private void createChatHead()
 	{
+		// Center Point of Close Icon
 		closeX = screenW / 2;
 		closeY = (int) (screenY - (closeViewMutipler / 2 * size) - size);
 
+		/*
+		 * Parameters and Font Initialization
+		 */
+
+		// Font
 		Typeface font = Typeface.createFromAsset(getAssets(), "fonts/webdings.ttf");
 
-		LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, closeViewMutipler * size);
-		tvParams.gravity = Gravity.BOTTOM;
+		// ChatHead Parameters (size,size)
+		LinearLayout.LayoutParams roundParams = new LinearLayout.LayoutParams(size, size);
 
-		closeParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
-				WindowManager.LayoutParams.TYPE_PHONE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
+		// Bottom Layout Parameters
+		LinearLayout.LayoutParams bottomParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, closeViewMutipler * size);
+		bottomParams.gravity = Gravity.BOTTOM;
 
-		WindowManager.LayoutParams lpParams = new WindowManager.LayoutParams(size, size);
+		// Close Layout Parameters
+		closeParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, closeViewMutipler * size, WindowManager.LayoutParams.TYPE_PHONE,
+				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
+		closeParams.gravity = Gravity.BOTTOM;
+
+		// Main Chat Head Parameters
+		chatHeadParams = new WindowManager.LayoutParams(size, size, WindowManager.LayoutParams.TYPE_PHONE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
+		chatHeadParams.gravity = Gravity.TOP | Gravity.LEFT;
 
 		closeView = new LinearLayout(this);
-		closeView.setLayoutParams(tvParams);
+		closeView.setLayoutParams(bottomParams);
 		closeView.setBackgroundResource(R.drawable.close_view_grad);
 		closeView.setGravity(Gravity.CENTER);
 		closeView.setVisibility(View.INVISIBLE);
 
 		LinearLayout crossView = new LinearLayout(this);
-		crossView.setLayoutParams(tvParams);
+		crossView.setLayoutParams(roundParams);
 		crossView.setBackgroundResource(R.drawable.round_drawable_white);
 
 		closeIcon = new TextView(this);
@@ -131,7 +145,7 @@ public class ChatHeadService extends Service
 		closeIcon.setTextSize(textsize);
 		closeIcon.setTextColor(Color.BLACK);
 		closeIcon.setGravity(Gravity.CENTER);
-		closeIcon.setLayoutParams(lpParams);
+		closeIcon.setLayoutParams(roundParams);
 		closeView.setVisibility(View.INVISIBLE);
 
 		crossView.addView(closeIcon);
@@ -139,20 +153,15 @@ public class ChatHeadService extends Service
 		windowManager.addView(closeView, closeParams);
 
 		chatHeadView = new LinearLayout(this);
-		chatHeadView.setLayoutParams(lpParams);
+		chatHeadView.setLayoutParams(roundParams);
 		chatHeadView.setBackgroundResource(R.drawable.round_drawable);
 
 		chatHeadIcon = new TextView(this);
 		chatHeadIcon.setTypeface(font);
-		chatHeadIcon.setText("P");
+		chatHeadIcon.setText("Q");
 		chatHeadIcon.setTextColor(Color.WHITE);
 		chatHeadIcon.setTextSize(textsize);
 		chatHeadIcon.setGravity(Gravity.CENTER);
-		chatHeadIcon.setLayoutParams(tvParams);
-
-		chatHeadParams = new WindowManager.LayoutParams(size, size, WindowManager.LayoutParams.TYPE_PHONE,
-				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
-		chatHeadParams.gravity = Gravity.TOP | Gravity.LEFT;
 
 		chatHeadView.addView(chatHeadIcon);
 		windowManager.addView(chatHeadView, chatHeadParams);
@@ -183,7 +192,7 @@ public class ChatHeadService extends Service
 
 	private void setOnClickListener()
 	{
-		chatHeadIcon.setOnClickListener(new View.OnClickListener()
+		chatHeadView.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -195,7 +204,7 @@ public class ChatHeadService extends Service
 
 	private void setOnTouchListener()
 	{
-		chatHeadIcon.setOnTouchListener(new View.OnTouchListener()
+		chatHeadView.setOnTouchListener(new View.OnTouchListener()
 		{
 			private int initialX;
 			private int initialY;
