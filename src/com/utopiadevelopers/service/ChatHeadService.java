@@ -113,6 +113,10 @@ public class ChatHeadService extends Service
 		// Font
 		Typeface font = Typeface.createFromAsset(getAssets(), "fonts/webdings.ttf");
 
+		// Center Params
+		LinearLayout.LayoutParams centerParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+		centerParams.gravity = Gravity.CENTER;
+
 		// ChatHead Parameters (size,size)
 		LinearLayout.LayoutParams roundParams = new LinearLayout.LayoutParams(size, size);
 
@@ -130,7 +134,7 @@ public class ChatHeadService extends Service
 		chatHeadParams.gravity = Gravity.TOP | Gravity.LEFT;
 
 		closeView = new LinearLayout(this);
-		closeView.setLayoutParams(bottomParams);
+		closeView.setLayoutParams(centerParams);
 		closeView.setBackgroundResource(R.drawable.close_view_grad);
 		closeView.setGravity(Gravity.CENTER);
 		closeView.setVisibility(View.INVISIBLE);
@@ -162,6 +166,7 @@ public class ChatHeadService extends Service
 		chatHeadIcon.setTextColor(Color.WHITE);
 		chatHeadIcon.setTextSize(textsize);
 		chatHeadIcon.setGravity(Gravity.CENTER);
+		chatHeadIcon.setLayoutParams(centerParams);
 
 		chatHeadView.addView(chatHeadIcon);
 		windowManager.addView(chatHeadView, chatHeadParams);
