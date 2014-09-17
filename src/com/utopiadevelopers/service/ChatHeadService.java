@@ -108,7 +108,7 @@ public class ChatHeadService extends Service
 		closeX = screenW / 2;
 		closeY = (int) (screenY - (closeViewMutipler / 2 * size) - size);
 
-		Typeface font = Typeface.createFromAsset(getAssets(), "fonts/zombats-app.ttf");
+		Typeface font = Typeface.createFromAsset(getAssets(), "fonts/webdings.ttf");
 
 		LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, closeViewMutipler * size);
 		tvParams.gravity = Gravity.BOTTOM;
