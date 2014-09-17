@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.os.IBinder;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -47,25 +46,23 @@ public class ChatHeadService extends Service
 		return null;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
-		logService("Service Created");
 		windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
-		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		screenW = windowManager.getDefaultDisplay().getWidth();
 		screenY = windowManager.getDefaultDisplay().getHeight();
 
 		size = screenW / 7;
 		CLOSE_THRESOLD = (int) (1.2 * size);
-
 		textsize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 28, getResources().getDisplayMetrics());
 
 		createChatHead();
-		setOnClickListener();
 		setOnTouchListener();
+		setOnClickListener();
 	}
 
 	public void closeChatHeads()

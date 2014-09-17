@@ -1,5 +1,8 @@
 package com.utopiadevelopers.chatheads;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -26,6 +29,13 @@ public class MainActivity extends ActionBarActivity implements OnClickListener
 		stop = (Button) findViewById(R.id.btnStop);
 		start.setOnClickListener(this);
 		stop.setOnClickListener(this);
+
+		if (MainActivity.isMyServiceRunning(ChatHeadService.class, this))
+		{
+			start.setEnabled(false);
+			stop.setEnabled(true);
+		}
+
 	}
 
 	@Override
@@ -59,5 +69,18 @@ public class MainActivity extends ActionBarActivity implements OnClickListener
 		default:
 			break;
 		}
+	}
+
+	public static boolean isMyServiceRunning(Class<?> serviceClass, Context ctx)
+	{
+		ActivityManager manager = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+		{
+			if (serviceClass.getName().equals(service.service.getClassName()))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }
