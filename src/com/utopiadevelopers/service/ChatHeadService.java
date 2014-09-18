@@ -1,10 +1,14 @@
 package com.utopiadevelopers.service;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.TypedValue;
@@ -39,6 +43,8 @@ public class ChatHeadService extends Service
 	private int closeX;
 	private int closeY;
 	private int CLOSE_THRESOLD;
+
+	private Handler mAnimationHandler = new Handler();
 
 	@Override
 	public IBinder onBind(Intent intent)
@@ -275,4 +281,72 @@ public class ChatHeadService extends Service
 		}
 		return false;
 	}
+
+	/*
+	 * Animation Classes
+	 */
+
+	private class ChatHeadAnimationTimerTask extends TimerTask
+	{
+		// Ultimate destination coordinates toward which the tray will move
+		int mInitX;
+		int mInitY;
+		int mDestX;
+		int mDestY;
+
+		WindowManager.LayoutParams params;
+		View v;
+		Timer t;
+
+		public ChatHeadAnimationTimerTask(int x1, int y1, int x2, int y2, WindowManager.LayoutParams params, View v, Timer t)
+		{
+			mInitX = x1;
+			mInitY = y2;
+
+			mDestX = x2;
+			mDestY = y2;
+
+			this.params = params;
+			this.v = v;
+			this.t = t;
+
+			params.x = mInitX;
+			params.y = mInitY;
+		}
+
+		@Override
+		public void run()
+		{
+
+			mAnimationHandler.post(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					params.x = (2 * (params.x - mDestX)) / 3 + mDestX;
+					params.y = (2 * (params.y - mDestY)) / 3 + mDestY;
+
+					if (params.x < 0 || params.x > screenW)
+					{
+						params.x = mDestX;
+					}
+
+					if (params.y < 0 || params.x > screenY)
+					{
+						params.y = mDestY;
+					}
+					windowManager.updateViewLayout(v, params);
+
+					// Cancel animation when the destination is reached
+					if (Math.abs(params.x - mDestX) < 2 && Math.abs(params.y - mDestY) < 2)
+					{
+						ChatHeadAnimationTimerTask.this.cancel();
+						t.cancel();
+					}
+				}
+			});
+		}
+	}
+
 }
