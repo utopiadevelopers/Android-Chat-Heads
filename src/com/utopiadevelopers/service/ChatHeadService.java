@@ -349,4 +349,42 @@ public class ChatHeadService extends Service
 		}
 	}
 
+	private class CloseAnimationTimerTask extends TimerTask
+	{
+		// Ultimate destination coordinates toward which the tray will move
+		int mDestX;
+		int mDestY;
+
+		public CloseAnimationTimerTask(int x, int y)
+		{
+			mDestX = x;
+			mDestY = y;
+		}
+
+		@Override
+		public void run()
+		{
+			// handler is used to run the function on main UI thread in order to
+			// access the layouts and UI elements.
+			mAnimationHandler.post(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					closeParams.x = (2 * (closeParams.x - mDestX)) / 3 + mDestX;
+					closeParams.y = (2 * (closeParams.y - mDestY)) / 3 + mDestY;
+					windowManager.updateViewLayout(closeView, closeParams);
+
+					// Cancel animation when the destination is reached
+					if (Math.abs(closeParams.x - mDestX) < 2 && Math.abs(closeParams.y - mDestY) < 2)
+					{
+						CloseAnimationTimerTask.this.cancel();
+						// closeTimer.cancel();
+					}
+				}
+			});
+		}
+
+	}
 }
